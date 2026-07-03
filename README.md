@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="static/uoh_logo.png" width="120">
+</p>
+
 # 🛡️ Security Risk Management System
 
 A web-based cybersecurity risk management system developed using Flask to help organizations manage IT assets, assess security risks, monitor activities, and generate reports.
@@ -24,6 +28,14 @@ This project provides a centralized platform for managing organizational assets 
 - 🌙 Professional Dark UI
 
 ---
+## 🎯 Use Cases
+
+- Track organizational IT assets.
+- Assess cybersecurity risks.
+- Monitor high-risk assets.
+- Review user activities.
+- Export security reports.
+- Generate printable dashboards.
 
 ## 🛠️ Technologies Used
 
@@ -58,7 +70,17 @@ python app.py
 ```
 
 ---
+## 📂 Project Structure
 
+```
+Security-Risk-Management-System/
+│
+├── static/
+├── templates/
+├── app.py
+├── assets.csv
+└── README.md
+```
 ## 🖼️ Screenshots
 
 ### Login
@@ -103,6 +125,7 @@ python app.py
 **Shujun Alsaif**
 
 Information Security Graduate
+⭐ If you found this project useful, consider giving it a star.
 
 University of Hail
 
