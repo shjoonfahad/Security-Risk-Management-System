@@ -1,0 +1,21 @@
+asset_name,asset_type,likelihood,impact,notes
+Main Web Server,Server,4,5,Hosts university website - critical for operations
+Student Database Server,Database,5,5,Contains all student records - highly sensitive data
+Network Firewall,Network Device,3,4,Main perimeter security device protecting network
+WiFi Access Points,Network Device,2,3,Guest and staff wireless network access
+IT Staff Laptops,Workstation,3,3,Contains administrative credentials and sensitive files
+CCTV System,IoT Device,2,2,Physical security monitoring system
+Backup Server,Server,2,4,Daily backup system for all critical data
+Email Server,Server,3,4,University email communications platform
+Library Management System,Application,2,3,Book lending and catalog management system
+Printer Network,IoT Device,1,2,Shared printing devices across campus
+Active Directory Server,Server,5,5,Central authentication for all university systems
+VPN Gateway,Network Device,3,5,Remote access for staff and students
+Financial System,Application,4,5,Student payments and university financial data
+Research Database,Database,3,4,Faculty research projects and grant information
+Security Cameras Storage,Server,2,3,Stores CCTV footage for 90 days
+Student Portal,Application,3,4,Online services for students - registration and grades
+Admin Workstations,Workstation,2,3,HR and administrative staff computers
+Network Switches,Network Device,2,3,Core network infrastructure equipment
+IoT Door Locks,IoT Device,3,3,Electronic access control system
+Mobile Device Management,Application,2,2,Manages university-issued mobile devices
