@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-head">About — UOH Cybersecurity</div>
+  <div class="about">
+    <img src="{{ url_for('static', filename='uoh_logo.png') }}" class="about-logo" alt="UOH" onerror="this.style.display='none'">
+    <div class="about-text">
+      <h3>{{ app_title }}</h3>
+      <p>
+        This internal platform is built for the IT & Cybersecurity teams to track assets, assess risks, and coordinate remediation.
+        It includes risk insights, alerts, activity logs, and export/print features.
+      </p>
+      <ul>
+        <li>Developer: <b>Shujun Alsaif (202103624)</b></li>
+        <li>Department: University of Hail — Cybersecurity</li>
+        <li>Version: v2.0 (Dark Professional)</li>
+        <li>Features: Risk Matrix (implicit), Alerts, Print Report, CSV Import/Export, Session Timeout</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

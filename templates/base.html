@@ -1,0 +1,82 @@
+{% set current = request.endpoint %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title or 'UOH Risk' }} — {{ app_title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  {% if session.get('user_id') %}
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='uoh_logo.png') }}" alt="UOH" onerror="this.style.display='none'">
+      <div class="brand-text">
+        <div class="brand-title">UOH Cybersecurity</div>
+        <div class="brand-sub">{{ app_title }}</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="nav-link {{ 'active' if current=='dashboard' else '' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a class="nav-link {{ 'active' if current=='assets_page' else '' }}" href="{{ url_for('assets_page') }}">Assets</a>
+      <a class="nav-link {{ 'active' if current=='alerts_page' else '' }}" href="{{ url_for('alerts_page') }}">Alerts</a>
+      <a class="nav-link {{ 'active' if current=='activity' else '' }}" href="{{ url_for('activity') }}">Activity</a>
+      <a class="nav-link {{ 'active' if current=='settings' else '' }}" href="{{ url_for('settings') }}">Settings</a>
+      <a class="nav-link {{ 'active' if current=='about' else '' }}" href="{{ url_for('about') }}">About</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">{{ session.get('username','?')[:1].upper() }}</div>
+        <div>
+          <div class="name">{{ session.get('username','User') }}</div>
+          <div class="role">{{ session.get('role','User') }}</div>
+        </div>
+      </div>
+      <a class="btn btn-light w-100" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </aside>
+  {% endif %}
+
+  <main class="main">
+    {% if session.get('user_id') %}
+    <header class="topbar">
+      <div class="page-title">{{ title or 'Dashboard' }}</div>
+      <div class="actions">
+        <button id="notifyBtn" class="icon-btn" title="Notifications">
+          <span class="bell">🔔</span>
+          <span id="notifyDot" class="dot hidden"></span>
+        </button>
+        <a class="btn" href="{{ url_for('dashboard_print') }}" target="_blank">Print Report (PDF)</a>
+      </div>
+      <div id="notifyPanel" class="notify-panel hidden">
+        <div class="notify-head">Recent High-Risk Alerts</div>
+        <div id="notifyList" class="notify-list"></div>
+        <div class="notify-foot">
+          <a href="{{ url_for('alerts_page') }}" class="link">Open Alerts</a>
+        </div>
+      </div>
+    </header>
+    {% endif %}
+
+    <section class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>
+
+

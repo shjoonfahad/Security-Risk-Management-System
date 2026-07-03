@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login — {{ app_title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="login-left">
+      <div class="login-logo">
+        <img src="{{ url_for('static', filename='uoh_logo.png') }}" alt="UOH" onerror="this.style.display='none'">
+      </div>
+      <div class="login-title">University of Hail</div>
+      <div class="login-sub">UOH Cybersecurity</div>
+      <div class="login-sub2">Security Risk Management System</div>
+      <div class="login-badge">Authorized Personnel Only</div>
+    </div>
+    <div class="login-right">
+      <h3 class="form-title">System Login</h3>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('login') }}" class="form">
+        <label class="label">Username</label>
+        <input type="text" name="username" class="input" required>
+
+        <label class="label">Password</label>
+        <input type="password" name="password" class="input" required>
+
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+        <div class="helper">Default: <b>admin</b> / <b>admin123</b></div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

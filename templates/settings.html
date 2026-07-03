@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-head">Settings</div>
+    <p class="muted">This is a lightweight settings page. (Placeholders)</p>
+    <ul class="list">
+      <li>Session Timeout: 15 minutes (auto-logout)</li>
+      <li>Theme: Dark Professional</li>
+      <li>Role: {{ session.get('role','User') }}</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-head">About System</div>
+    <p>See the full details in the <a href="{{ url_for('about') }}">About</a> page.</p>
+  </div>
+</div>
+{% endblock %}

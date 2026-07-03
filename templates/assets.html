@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="card-head">Assets</div>
+  <div class="filters">
+    <input id="searchAsset" class="input" placeholder="Search by name...">
+    <select id="filterType" class="input">
+      <option value="">All Types</option>
+      <option>Server</option><option>Workstation</option><option>Network Device</option>
+      <option>Database</option><option>Application</option><option>IoT Device</option><option>Physical Asset</option>
+    </select>
+    <select id="filterRisk" class="input">
+      <option value="">All Risks</option>
+      <option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option>
+    </select>
+    <select id="filterDept" class="input">
+      <option value="">All Departments</option>
+      {% for d in departments %}
+      <option>{{ d }}</option>
+      {% endfor %}
+    </select>
+    <a class="btn" href="{{ url_for('export_csv') }}">Export CSV</a>
+    <button class="btn btn-primary" onclick="openAdd()">Add Asset</button>
+  </div>
+
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Asset Name</th><th>Type</th><th>Dept</th>
+          <th>L</th><th>I</th><th>Score</th><th>Risk</th><th>Added</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="assetsTable">
+        {% for a in all_assets %}
+        <tr data-name="{{ a['asset_name']|lower }}" data-type="{{ a['asset_type'] }}" data-risk="{{ a['risk_level'] }}" data-dept="{{ a['department'] or '' }}">
+          <td><b>{{ a['asset_name'] }}</b></td>
+          <td>{{ a['asset_type'] }}</td>
+          <td>{{ a['department'] or 'N/A' }}</td>
+          <td class="center">{{ a['likelihood'] }}</td>
+          <td class="center">{{ a['impact'] }}</td>
+          <td class="center">{{ a['risk_score'] }}</td>
+          <td>
+            <span class="badge {{ a['risk_level']|lower }}">{{ a['risk_level'] }}</span>
+          </td>
+          <td class="muted">{{ (a['date_added'] or '')[:10] }}</td>
+          <td>
+            <button class="btn xs" onclick='openEdit({{ a["id"] }},"{{ a["asset_name"] }}","{{ a["asset_type"] }}","{{ a["department"] or "" }}",{{ a["likelihood"] }},{{ a["impact"] }},"{{ a["notes"] or "" }}")'>Edit</button>
+            <button class="btn xs danger" onclick='delAsset({{ a["id"] }},"{{ a["asset_name"] }}")'>Delete</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Modal -->
+<div id="addModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">Add Asset</div>
+    <div class="modal-body">
+      <div class="grid grid-2">
+        <div>
+          <label class="label">Name *</label>
+          <input id="add_name" class="input" required>
+        </div>
+        <div>
+          <label class="label">Type *</label>
+          <select id="add_type" class="input">
+            <option>Server</option><option>Workstation</option><option>Network Device</option>
+            <option>Database</option><option>Application</option><option>IoT Device</option><option>Physical Asset</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Department</label>
+          <input id="add_dept" class="input" placeholder="IT Security...">
+        </div>
+        <div>
+          <label class="label">Likelihood (1-5)</label>
+          <input id="add_l" type="number" min="1" max="5" class="input" value="3">
+        </div>
+        <div>
+          <label class="label">Impact (1-5)</label>
+          <input id="add_i" type="number" min="1" max="5" class="input" value="3">
+        </div>
+        <div class="col-span-2">
+          <label class="label">Notes</label>
+          <textarea id="add_notes" class="input" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeAdd()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAdd()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">Edit Asset</div>
+    <div class="modal-body">
+      <input type="hidden" id="edit_id">
+      <div class="grid grid-2">
+        <div>
+          <label class="label">Name *</label>
+          <input id="edit_name" class="input" required>
+        </div>
+        <div>
+          <label class="label">Type *</label>
+          <select id="edit_type" class="input">
+            <option>Server</option><option>Workstation</option><option>Network Device</option>
+            <option>Database</option><option>Application</option><option>IoT Device</option><option>Physical Asset</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Department</label>
+          <input id="edit_dept" class="input">
+        </div>
+        <div>
+          <label class="label">Likelihood (1-5)</label>
+          <input id="edit_l" type="number" min="1" max="5" class="input">
+        </div>
+        <div>
+          <label class="label">Impact (1-5)</label>
+          <input id="edit_i" type="number" min="1" max="5" class="input">
+        </div>
+        <div class="col-span-2">
+          <label class="label">Notes</label>
+          <textarea id="edit_notes" class="input" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEdit()">Update</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function applyFilters() {
+  const s = document.getElementById('searchAsset').value.toLowerCase();
+  const t = document.getElementById('filterType').value;
+  const r = document.getElementById('filterRisk').value;
+  const d = document.getElementById('filterDept').value;
+
+  document.querySelectorAll('#assetsTable tr').forEach(tr=>{
+    const n = tr.dataset.name;
+    const ty= tr.dataset.type;
+    const ri= tr.dataset.risk;
+    const de= tr.dataset.dept;
+    const ok = (!s || n.includes(s)) && (!t || ty===t) && (!r || ri===r) && (!d || de===d);
+    tr.style.display = ok ? '' : 'none';
+  })
+}
+
+['searchAsset','filterType','filterRisk','filterDept'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener(el.tagName==='INPUT'?'input':'change', applyFilters);
+});
+
+function openAdd(){ document.getElementById('addModal').classList.remove('hidden'); }
+function closeAdd(){ document.getElementById('addModal').classList.add('hidden'); }
+function openEdit(id,name,typ,dept,l,i,notes){
+  document.getElementById('edit_id').value=id;
+  document.getElementById('edit_name').value=name;
+  document.getElementById('edit_type').value=typ;
+  document.getElementById('edit_dept').value=dept;
+  document.getElementById('edit_l').value=l;
+  document.getElementById('edit_i').value=i;
+  document.getElementById('edit_notes').value=notes;
+  document.getElementById('editModal').classList.remove('hidden');
+}
+function closeEdit(){ document.getElementById('editModal').classList.add('hidden'); }
+
+async function submitAdd(){
+  const body = {
+    asset_name: document.getElementById('add_name').value,
+    asset_type: document.getElementById('add_type').value,
+    department: document.getElementById('add_dept').value,
+    likelihood: document.getElementById('add_l').value,
+    impact: document.getElementById('add_i').value,
+    notes: document.getElementById('add_notes').value
+  };
+  const r = await fetch('{{ url_for("add_asset") }}', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  const d = await r.json();
+  if(d.success){ location.reload(); } else { alert(d.error || 'Error'); }
+}
+
+async function submitEdit(){
+  const body = {
+    id: document.getElementById('edit_id').value,
+    asset_name: document.getElementById('edit_name').value,
+    asset_type: document.getElementById('edit_type').value,
+    department: document.getElementById('edit_dept').value,
+    likelihood: document.getElementById('edit_l').value,
+    impact: document.getElementById('edit_i').value,
+    notes: document.getElementById('edit_notes').value
+  };
+  const r = await fetch('{{ url_for("edit_asset") }}', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  const d = await r.json();
+  if(d.success){ location.reload(); } else { alert(d.error || 'Error'); }
+}
+
+async function delAsset(id,name){
+  if(!confirm(`Delete "${name}"?`)) return;
+  const r = await fetch('{{ url_for("delete_asset") }}', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id})});
+  const d = await r.json();
+  if(d.success){ location.reload(); } else { alert(d.error || 'Error'); }
+}
+</script>
+<script>
+document.addEventListener('click', function(e) {
+  // إغلاق المودال إذا ضغط المستخدم بالخلفية (خارج المربع)
+  if(e.target.classList.contains('modal')) {
+    e.target.classList.add('hidden');
+  }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }} — Printable Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; color:#111; margin:24px; }
+    .head { display:flex; align-items:center; gap:16px; border-bottom:2px solid #222; padding-bottom:10px; margin-bottom:18px; }
+    .head img { width:64px; height:64px; object-fit:contain; }
+    h1 { margin:0; font-size:20px; }
+    .muted { color:#666; font-size:12px; }
+    .grid { display:grid; grid-template-columns: repeat(4,1fr); gap:12px; margin:16px 0; }
+    .stat { border:1px solid #ddd; padding:12px; border-radius:8px; text-align:center; }
+    .table { width:100%; border-collapse: collapse; font-size:13px; }
+    .table th, .table td { border:1px solid #ccc; padding:8px; }
+    .section { margin-top:18px; }
+    @media print { a { display:none; } }
+  </style>
+</head>
+<body onload="window.print()">
+  <div class="head">
+    <img src="{{ url_for('static', filename='uoh_logo.png') }}" alt="UOH">
+    <div>
+      <h1>UOH Cybersecurity — Risk Dashboard Report</h1>
+      <div class="muted">{{ app_title }} • Generated: {{ (caller_time or '') }}</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><div>Total Assets</div><h2>{{ stats.total }}</h2></div>
+    <div class="stat"><div>High Risk</div><h2>{{ stats.high }}</h2></div>
+    <div class="stat"><div>Medium Risk</div><h2>{{ stats.medium }}</h2></div>
+    <div class="stat"><div>Low Risk</div><h2>{{ stats.low }}</h2></div>
+  </div>
+
+  <div class="section">
+    <h3>Recent Activity</h3>
+    <table class="table">
+      <thead><tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr><td>{{ log['user'] }}</td><td>{{ log['action'] }}</td><td>{{ log['details'] }}</td><td>{{ log['timestamp'] }}</td></tr>
+        {% else %}<tr><td colspan="4">No activity.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3>Assets (Top by Risk)</h3>
+    <table class="table">
+      <thead><tr><th>Asset</th><th>Type</th><th>Dept</th><th>Score</th><th>Risk</th><th>Added</th></tr></thead>
+      <tbody>
+        {% for a in assets[:20] %}
+        <tr>
+          <td>{{ a['asset_name'] }}</td>
+          <td>{{ a['asset_type'] }}</td>
+          <td>{{ a['department'] or 'N/A' }}</td>
+          <td>{{ a['risk_score'] }}</td>
+          <td>{{ a['risk_level'] }}</td>
+          <td>{{ (a['date_added'] or '')[:16] }}</td>
+        </tr>
+        {% else %}<tr><td colspan="6">No assets.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid grid-4">
+  <div class="card stat">
+    <div class="stat-num">{{ stats.total }}</div>
+    <div class="stat-label">Total Assets</div>
+  </div>
+  <div class="card stat danger">
+    <div class="stat-num">{{ stats.high }}</div>
+    <div class="stat-label">Critical Risk</div>
+  </div>
+  <div class="card stat warn">
+    <div class="stat-num">{{ stats.medium }}</div>
+    <div class="stat-label">Medium Risk</div>
+  </div>
+  <div class="card stat ok">
+    <div class="stat-num">{{ stats.low }}</div>
+    <div class="stat-label">Low Risk</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-head">Risk Level Distribution</div>
+    <canvas id="pieChart"></canvas>
+  </div>
+  <div class="card">
+    <div class="card-head">Risk Insights</div>
+    <ul class="insights">
+      <li><b>Most Critical Asset:</b>
+        {% if top_asset %}
+          {{ top_asset['asset_name'] }} ({{ top_asset['risk_score'] }}) — <i>{{ top_asset['department'] or 'N/A' }}</i>
+        {% else %}N/A{% endif %}
+      </li>
+      <li><b>Average Risk (30d) Change:</b>
+        {% if delta_pct > 0 %}+{{ delta_pct }}% ↑{% elif delta_pct < 0 %}{{ delta_pct }}% ↓{% else %}0%{% endif %}
+      </li>
+      <li><b>Advice:</b>
+        {% if top_asset and top_asset['asset_type'] in ['Server','Network Device'] %}
+          Review hardening baseline & latest patches.
+        {% else %}
+          Validate access controls and backup status.
+        {% endif %}
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">Recent Activity</div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th>User</th><th>Action</th><th>Details</th><th>Time</th></tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>{{ log['user'] }}</td>
+          <td>{{ log['action'] }}</td>
+          <td>{{ log['details'] }}</td>
+          <td>{{ log['timestamp'] }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="muted">No activity yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const pieCtx = document.getElementById('pieChart');
+new Chart(pieCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['High','Medium','Low'],
+    datasets: [{ data: [{{ stats.high }}, {{ stats.medium }}, {{ stats.low }}], borderWidth: 0 }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom' } }
+  }
+});
+</script>
+{% endblock %}
